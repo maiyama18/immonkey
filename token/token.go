@@ -13,7 +13,7 @@ func New(tokenType Type, literal string) Token {
 
 const (
 	ILLEGAL Type = "ILLEGAL"
-	EOR     Type = "EOF"
+	EOF     Type = "EOF"
 
 	// identifier & literals
 	IDENTIFIER Type = "IDENTIFIER"
