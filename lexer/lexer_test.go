@@ -9,14 +9,22 @@ import (
 
 func TestLexer_NextToken(t *testing.T) {
 	tests := []struct {
+		name           string
 		input          string
 		expectedTokens []token.Token
 	}{
 		{
-			input: `=+(){},;`,
+			name:  "single-char tokens",
+			input: `=!+-*/><(){},;`,
 			expectedTokens: []token.Token{
 				{token.ASSIGN, "="},
+				{token.BANG, "!"},
 				{token.PLUS, "+"},
+				{token.MINUS, "-"},
+				{token.ASTERISK, "*"},
+				{token.SLASH, "/"},
+				{token.GT, ">"},
+				{token.LT, "<"},
 				{token.LPAREN, "("},
 				{token.RPAREN, ")"},
 				{token.LBRACE, "{"},
@@ -26,6 +34,7 @@ func TestLexer_NextToken(t *testing.T) {
 			},
 		},
 		{
+			name: "identifiers",
 			input: `
 let ten = 10;
 
