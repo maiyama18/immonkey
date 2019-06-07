@@ -27,19 +27,19 @@ func TestLexer_NextToken(t *testing.T) {
 		},
 		{
 			input: `
-let five = 5;
+let ten = 10;
 
 let add = fn(x, y) {
 	x + y;
 };
 
-let result = add(five, 10);
+let result = add(5, ten);
 `,
 			expectedTokens: []token.Token{
 				{token.LET, "let"},
-				{token.IDENTIFIER, "five"},
+				{token.IDENTIFIER, "ten"},
 				{token.ASSIGN, "="},
-				{token.INT, "5"},
+				{token.INT, "10"},
 				{token.SEMICOLON, ";"},
 
 				{token.LET, "let"},
@@ -64,9 +64,9 @@ let result = add(five, 10);
 				{token.ASSIGN, "="},
 				{token.IDENTIFIER, "add"},
 				{token.LPAREN, "("},
-				{token.IDENTIFIER, "five"},
+				{token.INT, "5"},
 				{token.COMMA, ","},
-				{token.INT, "10"},
+				{token.IDENTIFIER, "ten"},
 				{token.RPAREN, ")"},
 				{token.SEMICOLON, ";"},
 			},
@@ -75,9 +75,9 @@ let result = add(five, 10);
 
 	for _, test := range tests {
 		l := New(test.input)
-		for _, expected := range test.expectedTokens {
+		for i, expected := range test.expectedTokens {
 			actual := l.NextToken()
-			require.Equal(t, expected, actual)
+			require.Equal(t, expected, actual, "%d-th token wrong", i)
 		}
 	}
 }

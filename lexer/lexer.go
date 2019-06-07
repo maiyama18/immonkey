@@ -1,6 +1,10 @@
 package lexer
 
-import "github.com/maiyama18/immonkey/token"
+import (
+	"bytes"
+
+	"github.com/maiyama18/immonkey/token"
+)
 
 type Lexer struct {
 	input        string
@@ -16,8 +20,9 @@ func New(input string) *Lexer {
 }
 
 func (l *Lexer) NextToken() token.Token {
-	var tk token.Token
+	l.skipSpaces()
 
+	var tk token.Token
 	switch l.char {
 	case '=':
 		tk = token.New(token.ASSIGN, "=")
@@ -37,6 +42,16 @@ func (l *Lexer) NextToken() token.Token {
 		tk = token.New(token.SEMICOLON, ";")
 	case 0:
 		tk = token.New(token.EOF, "")
+	default:
+		if isLetter(l.char) {
+			literal := l.readName()
+			return token.New(token.TypeOf(literal), literal)
+		} else if isDigit(l.char) {
+			literal := l.readNumber()
+			return token.New(token.INT, literal)
+		} else {
+			return token.New(token.ILLEGAL, string(l.char))
+		}
 	}
 
 	l.readChar()
@@ -51,4 +66,36 @@ func (l *Lexer) readChar() {
 	}
 	l.position = l.peekPosition
 	l.peekPosition++
+}
+
+func (l *Lexer) readName() string {
+	var b bytes.Buffer
+	for isLetter(l.char) {
+		b.WriteByte(l.char)
+		l.readChar()
+	}
+	return b.String()
+}
+
+func (l *Lexer) readNumber() string {
+	var b bytes.Buffer
+	for isDigit(l.char) {
+		b.WriteByte(l.char)
+		l.readChar()
+	}
+	return b.String()
+}
+
+func (l *Lexer) skipSpaces() {
+	for l.char == ' ' || l.char == '\t' || l.char == '\n' || l.char == '\r' {
+		l.readChar()
+	}
+}
+
+func isLetter(char byte) bool {
+	return 'a' <= char && 'z' <= char || 'A' <= char && 'Z' <= char || char == '_'
+}
+
+func isDigit(char byte) bool {
+	return '0' <= char && char <= '9'
 }

@@ -1,16 +1,5 @@
 package token
 
-type Type string
-
-type Token struct {
-	Type    Type
-	Literal string
-}
-
-func New(tokenType Type, literal string) Token {
-	return Token{Type: tokenType, Literal: literal}
-}
-
 const (
 	ILLEGAL Type = "ILLEGAL"
 	EOF     Type = "EOF"
@@ -36,3 +25,25 @@ const (
 	FUNCTION Type = "FUNCTION"
 	LET      Type = "LET"
 )
+
+type Type string
+
+type Token struct {
+	Type    Type
+	Literal string
+}
+
+func New(tokenType Type, literal string) Token {
+	return Token{Type: tokenType, Literal: literal}
+}
+
+func TypeOf(literal string) Type {
+	switch literal {
+	case "let":
+		return LET
+	case "fn":
+		return FUNCTION
+	default:
+		return IDENTIFIER
+	}
+}
