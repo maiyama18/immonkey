@@ -34,6 +34,24 @@ func TestLexer_NextToken(t *testing.T) {
 			},
 		},
 		{
+			name: "multi-char tokens",
+			input: `
+10 == 10;
+5 != 10;
+`,
+			expectedTokens: []token.Token{
+				{token.INT, "10"},
+				{token.EQ, "=="},
+				{token.INT, "10"},
+				{token.SEMICOLON, ";"},
+
+				{token.INT, "5"},
+				{token.NOTEQ, "!="},
+				{token.INT, "10"},
+				{token.SEMICOLON, ";"},
+			},
+		},
+		{
 			name: "identifiers/keywords",
 			input: `
 let ten = 10;

@@ -25,9 +25,19 @@ func (l *Lexer) NextToken() token.Token {
 	var tk token.Token
 	switch l.char {
 	case '=':
-		tk = token.New(token.ASSIGN, "=")
+		if l.peekChar() == '=' {
+			tk = token.New(token.EQ, "==")
+			l.readChar()
+		} else {
+			tk = token.New(token.ASSIGN, "=")
+		}
 	case '!':
-		tk = token.New(token.BANG, "!")
+		if l.peekChar() == '=' {
+			tk = token.New(token.NOTEQ, "!=")
+			l.readChar()
+		} else {
+			tk = token.New(token.BANG, "!")
+		}
 	case '<':
 		tk = token.New(token.LT, "<")
 	case '>':
@@ -78,6 +88,13 @@ func (l *Lexer) readChar() {
 	}
 	l.position = l.peekPosition
 	l.peekPosition++
+}
+
+func (l *Lexer) peekChar() byte {
+	if l.peekPosition >= len(l.input) {
+		return 0
+	}
+	return l.input[l.peekPosition]
 }
 
 func (l *Lexer) readName() string {

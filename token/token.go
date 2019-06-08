@@ -15,9 +15,11 @@ const (
 	ASTERISK Type = "*"
 	SLASH    Type = "/"
 
-	BANG Type = "!"
-	LT   Type = "<"
-	GT   Type = ">"
+	BANG  Type = "!"
+	LT    Type = "<"
+	GT    Type = ">"
+	EQ    Type = "=="
+	NOTEQ Type = "!="
 
 	// delimiters
 	COMMA     Type = ","
