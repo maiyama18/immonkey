@@ -55,6 +55,16 @@ func TypeOf(literal string) Type {
 		return LET
 	case "fn":
 		return FUNCTION
+	case "if":
+		return IF
+	case "else":
+		return ELSE
+	case "return":
+		return RETURN
+	case "true":
+		return TRUE
+	case "false":
+		return FALSE
 	default:
 		return IDENTIFIER
 	}
