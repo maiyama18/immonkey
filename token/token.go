@@ -31,6 +31,11 @@ const (
 	// keywords
 	FUNCTION Type = "FUNCTION"
 	LET      Type = "LET"
+	IF       Type = "IF"
+	ELSE     Type = "ELSE"
+	RETURN   Type = "RETURN"
+	TRUE     Type = "true"
+	FALSE    Type = "false"
 )
 
 type Type string
