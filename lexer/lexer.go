@@ -7,10 +7,10 @@ import (
 )
 
 type Lexer struct {
-	input        string
-	position     int
-	peekPosition int
-	char         byte
+	input           string
+	currentPosition int
+	peekPosition    int
+	char            byte
 }
 
 func New(input string) *Lexer {
@@ -86,7 +86,7 @@ func (l *Lexer) consumeChar() {
 	} else {
 		l.char = l.input[l.peekPosition]
 	}
-	l.position = l.peekPosition
+	l.currentPosition = l.peekPosition
 	l.peekPosition++
 }
 
