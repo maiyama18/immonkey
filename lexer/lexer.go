@@ -15,7 +15,7 @@ type Lexer struct {
 
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
-	l.readChar()
+	l.consumeChar()
 	return l
 }
 
@@ -27,14 +27,14 @@ func (l *Lexer) NextToken() token.Token {
 	case '=':
 		if l.peekChar() == '=' {
 			tk = token.New(token.EQ, "==")
-			l.readChar()
+			l.consumeChar()
 		} else {
 			tk = token.New(token.ASSIGN, "=")
 		}
 	case '!':
 		if l.peekChar() == '=' {
 			tk = token.New(token.NOTEQ, "!=")
-			l.readChar()
+			l.consumeChar()
 		} else {
 			tk = token.New(token.BANG, "!")
 		}
@@ -76,11 +76,11 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	}
 
-	l.readChar()
+	l.consumeChar()
 	return tk
 }
 
-func (l *Lexer) readChar() {
+func (l *Lexer) consumeChar() {
 	if l.peekPosition >= len(l.input) {
 		l.char = 0
 	} else {
@@ -101,7 +101,7 @@ func (l *Lexer) readName() string {
 	var b bytes.Buffer
 	for isLetter(l.char) {
 		b.WriteByte(l.char)
-		l.readChar()
+		l.consumeChar()
 	}
 	return b.String()
 }
@@ -110,14 +110,14 @@ func (l *Lexer) readNumber() string {
 	var b bytes.Buffer
 	for isDigit(l.char) {
 		b.WriteByte(l.char)
-		l.readChar()
+		l.consumeChar()
 	}
 	return b.String()
 }
 
 func (l *Lexer) skipSpaces() {
 	for l.char == ' ' || l.char == '\t' || l.char == '\n' || l.char == '\r' {
-		l.readChar()
+		l.consumeChar()
 	}
 }
 
