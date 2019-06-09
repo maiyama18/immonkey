@@ -1,11 +1,7 @@
 package parser
 
 import (
-	"fmt"
-	"strings"
 	"testing"
-
-	"github.com/maiyama18/immonkey/token"
 
 	"github.com/maiyama18/immonkey/ast"
 	"github.com/maiyama18/immonkey/lexer"
@@ -60,29 +56,20 @@ func testReturnStatement(t *testing.T, stmt ast.Statement) {
 	require.True(t, ok)
 }
 
-func TestPeekErrors(t *testing.T) {
-	input := `
-let x 42;
-let = 1;
-let 99;
-`
+func TestIdentifierExpression(t *testing.T) {
+	input := `foo;`
 
-	l := lexer.New(input)
-	p := New(l)
+	program := parseProgram(t, input)
 
-	_ = p.ParseProgram()
-	errs := p.Errors()
+	require.Equal(t, 1, len(program.Statements))
 
-	require.NotNil(t, errs)
-	require.Equal(t, 3, len(errs))
+	expStmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	require.True(t, ok)
 
-	tokenTypes := []token.Type{token.ASSIGN, token.IDENTIFIER, token.IDENTIFIER}
-	for i, tokenType := range tokenTypes {
-		err := errs[i]
-		expectMsg := fmt.Sprintf("expect next token to be %s", tokenType)
-		require.True(t, strings.Contains(err.Error(), expectMsg),
-			"expect '%s' to contain '%s'", err.Error(), expectMsg)
-	}
+	ident, ok := expStmt.Value.(*ast.Identifier)
+	require.True(t, ok)
+
+	require.Equal(t, "foo", ident.Name)
 }
 
 func parseProgram(t *testing.T, input string) *ast.Program {

@@ -8,6 +8,21 @@ import (
 	"github.com/maiyama18/immonkey/token"
 )
 
+const (
+	LOWEST      = iota
+	EQUALS      // ==, !=
+	LESSGREATER // >, <
+	SUM         // +, -
+	PRODUCT     // *, /
+	PREFIX      // -X, !X
+	CALL        // add(1, 2)
+)
+
+type (
+	parsePrefixFn func() ast.Expression
+	parseInfixFn  func(ast.Expression) ast.Expression
+)
+
 type Parser struct {
 	lxr *lexer.Lexer
 
@@ -15,6 +30,9 @@ type Parser struct {
 	peekToken    token.Token
 
 	errors []error
+
+	parsePrefixFns map[token.Type]parsePrefixFn
+	parseInfixFns  map[token.Type]parseInfixFn
 }
 
 func New(lxr *lexer.Lexer) *Parser {
@@ -22,6 +40,11 @@ func New(lxr *lexer.Lexer) *Parser {
 
 	p.nextToken()
 	p.nextToken()
+
+	p.parsePrefixFns = map[token.Type]parsePrefixFn{
+		token.IDENTIFIER: p.parseIdentifier,
+	}
+	p.parseInfixFns = map[token.Type]parseInfixFn{}
 
 	return p
 }
@@ -56,7 +79,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement()
 	}
 }
 
@@ -90,6 +113,33 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	return &ast.ReturnStatement{Token: token.New(token.RETURN, "return")}
 }
 
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	tk := p.currentToken
+
+	value := p.parseExpression(LOWEST)
+
+	if p.isPeekTokenType(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return &ast.ExpressionStatement{Token: tk, Value: value}
+}
+
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefixFn, ok := p.parsePrefixFns[p.currentToken.Type]
+	if !ok {
+		p.addParseExpressionError()
+		return nil
+	}
+	left := prefixFn()
+
+	return left
+}
+
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.currentToken, Name: p.currentToken.Literal}
+}
+
 func (p *Parser) expectPeekTokenType(tokenType token.Type) bool {
 	if !p.isPeekTokenType(tokenType) {
 		p.addPeekError(tokenType)
@@ -109,4 +159,8 @@ func (p *Parser) isCurrentTokenType(tokenType token.Type) bool {
 
 func (p *Parser) addPeekError(tokenType token.Type) {
 	p.errors = append(p.errors, fmt.Errorf("expect next token to be %s, but got %s", tokenType, p.peekToken.Type))
+}
+
+func (p *Parser) addParseExpressionError() {
+	p.errors = append(p.errors, fmt.Errorf("no function found to parse %s", p.currentToken.Type))
 }
