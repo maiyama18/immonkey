@@ -49,6 +49,8 @@ func TestLexer_NextToken(t *testing.T) {
 				{token.NOTEQ, "!="},
 				{token.INT, "10"},
 				{token.SEMICOLON, ";"},
+
+				{token.EOF, ""},
 			},
 		},
 		{
@@ -120,6 +122,8 @@ if (5 < 10) {
 				{token.FALSE, "false"},
 				{token.SEMICOLON, ";"},
 				{token.RBRACE, "}"},
+
+				{token.EOF, ""},
 			},
 		},
 	}
