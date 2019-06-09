@@ -80,6 +80,8 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	p.nextToken()
+
 	// TODO: parse expression value
 	for !p.isCurrentTokenType(token.SEMICOLON) {
 		p.nextToken()
