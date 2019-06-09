@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/maiyama18/immonkey/ast"
 	"github.com/maiyama18/immonkey/lexer"
 	"github.com/maiyama18/immonkey/token"
@@ -11,6 +13,8 @@ type Parser struct {
 
 	currentToken token.Token
 	peekToken    token.Token
+
+	errors []error
 }
 
 func New(lxr *lexer.Lexer) *Parser {
@@ -20,11 +24,6 @@ func New(lxr *lexer.Lexer) *Parser {
 	p.nextToken()
 
 	return p
-}
-
-func (p *Parser) nextToken() {
-	p.currentToken = p.peekToken
-	p.peekToken = p.lxr.NextToken()
 }
 
 func (p *Parser) ParseProgram() *ast.Program {
@@ -39,6 +38,15 @@ func (p *Parser) ParseProgram() *ast.Program {
 	}
 
 	return program
+}
+
+func (p *Parser) Errors() []error {
+	return p.errors
+}
+
+func (p *Parser) nextToken() {
+	p.currentToken = p.peekToken
+	p.peekToken = p.lxr.NextToken()
 }
 
 func (p *Parser) parseStatement() ast.Statement {
@@ -71,6 +79,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 func (p *Parser) expectPeekTokenType(tokenType token.Type) bool {
 	if !p.isPeekTokenType(tokenType) {
+		p.addPeekError(tokenType)
 		return false
 	}
 	p.nextToken()
@@ -83,4 +92,8 @@ func (p *Parser) isPeekTokenType(tokenType token.Type) bool {
 
 func (p *Parser) isCurrentTokenType(tokenType token.Type) bool {
 	return p.currentToken.Type == tokenType
+}
+
+func (p *Parser) addPeekError(tokenType token.Type) {
+	p.errors = append(p.errors, fmt.Errorf("expect next token to be %s, but got %s", tokenType, p.peekToken.Type))
 }
