@@ -3,7 +3,7 @@ package ast
 import "github.com/maiyama18/immonkey/token"
 
 type Node interface {
-	Token() token.Token
+	TokenLiteral() string
 }
 
 type Statement interface {
@@ -20,26 +20,26 @@ type Program struct {
 	Statements []Statement
 }
 
-func (p *Program) Token() token.Token {
+func (p *Program) TokenLiteral() string {
 	if len(p.Statements) == 0 {
-		return token.New(token.EOF, "")
+		return ""
 	}
-	return p.Statements[0].Token()
+	return p.Statements[0].TokenLiteral()
 }
 
 type LetStatement struct {
-	tk         token.Token
+	Token      token.Token
 	Identifier *Identifier
 	Value      Expression
 }
 
-func (ls *LetStatement) Token() token.Token { return ls.tk }
-func (ls *LetStatement) statementNode()     {}
+func (ls *LetStatement) TokenLiteral() string { return ls.Token.Literal }
+func (ls *LetStatement) statementNode()       {}
 
 type Identifier struct {
-	tk   token.Token
-	Name string
+	Token token.Token
+	Name  string
 }
 
-func (i *Identifier) Token() token.Token { return i.tk }
-func (i *Identifier) expressionNode()    {}
+func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
+func (i *Identifier) expressionNode()      {}
