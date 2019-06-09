@@ -84,8 +84,37 @@ func TestIntegerLiteralExpression(t *testing.T) {
 
 	intLiteral, ok := expStmt.Expression.(*ast.IntegerLiteral)
 	require.True(t, ok)
-
 	require.Equal(t, int64(42), intLiteral.Value)
+}
+
+func TestPrefixExpression(t *testing.T) {
+	tests := []struct {
+		input            string
+		expectedOperator string
+		expectedOperand  int64
+	}{
+		{"!5;", "!", 5},
+		{"-15;", "-", 15},
+	}
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			program := parseProgram(t, test.input)
+
+			require.Equal(t, 1, len(program.Statements))
+
+			expStmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+			require.True(t, ok)
+
+			prefixExp, ok := expStmt.Expression.(*ast.PrefixExpression)
+			require.True(t, ok)
+
+			require.Equal(t, test.expectedOperator, prefixExp.Operator)
+
+			intLiteral, ok := prefixExp.Right.(*ast.IntegerLiteral)
+			require.True(t, ok)
+			require.Equal(t, test.expectedOperand, intLiteral.Value)
+		})
+	}
 }
 
 func parseProgram(t *testing.T, input string) *ast.Program {

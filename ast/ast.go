@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/maiyama18/immonkey/token"
@@ -112,3 +113,13 @@ type IntegerLiteral struct {
 func (i *IntegerLiteral) TokenLiteral() string { return i.Token.Literal }
 func (i *IntegerLiteral) expressionNode()      {}
 func (i *IntegerLiteral) String() string       { return i.Token.Literal }
+
+type PrefixExpression struct {
+	Token    token.Token
+	Operator string
+	Right    Expression
+}
+
+func (p *PrefixExpression) TokenLiteral() string { return p.Token.Literal }
+func (p *PrefixExpression) expressionNode()      {}
+func (p *PrefixExpression) String() string       { return fmt.Sprintf("(%s%s)", p.Operator, p.Right.String()) }

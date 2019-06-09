@@ -45,6 +45,8 @@ func New(lxr *lexer.Lexer) *Parser {
 	p.parsePrefixFns = map[token.Type]parsePrefixFn{
 		token.IDENTIFIER: p.parseIdentifier,
 		token.INT:        p.parseIntegerLiteral,
+		token.MINUS:      p.parsePrefixExpression,
+		token.BANG:       p.parsePrefixExpression,
 	}
 	p.parseInfixFns = map[token.Type]parseInfixFn{}
 
@@ -149,6 +151,16 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 		return nil
 	}
 	return &ast.IntegerLiteral{Token: p.currentToken, Value: v}
+}
+
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	tk := p.currentToken
+	operator := p.currentToken.Literal
+
+	p.nextToken()
+	right := p.parseExpression(PREFIX)
+
+	return &ast.PrefixExpression{Token: tk, Operator: operator, Right: right}
 }
 
 func (p *Parser) expectPeekTokenType(tokenType token.Type) bool {
