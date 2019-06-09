@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/maiyama18/immonkey/ast"
 	"github.com/maiyama18/immonkey/lexer"
@@ -43,6 +44,7 @@ func New(lxr *lexer.Lexer) *Parser {
 
 	p.parsePrefixFns = map[token.Type]parsePrefixFn{
 		token.IDENTIFIER: p.parseIdentifier,
+		token.INT:        p.parseIntegerLiteral,
 	}
 	p.parseInfixFns = map[token.Type]parseInfixFn{}
 
@@ -116,19 +118,19 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	tk := p.currentToken
 
-	value := p.parseExpression(LOWEST)
+	exp := p.parseExpression(LOWEST)
 
 	if p.isPeekTokenType(token.SEMICOLON) {
 		p.nextToken()
 	}
 
-	return &ast.ExpressionStatement{Token: tk, Value: value}
+	return &ast.ExpressionStatement{Token: tk, Expression: exp}
 }
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefixFn, ok := p.parsePrefixFns[p.currentToken.Type]
 	if !ok {
-		p.addParseExpressionError()
+		p.addError("no function found to parse %s", p.currentToken.Type)
 		return nil
 	}
 	left := prefixFn()
@@ -140,9 +142,18 @@ func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.currentToken, Name: p.currentToken.Literal}
 }
 
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	v, err := strconv.ParseInt(p.currentToken.Literal, 0, 64)
+	if err != nil {
+		p.addError("could not parse '%s' as integer", p.currentToken.Literal)
+		return nil
+	}
+	return &ast.IntegerLiteral{Token: p.currentToken, Value: v}
+}
+
 func (p *Parser) expectPeekTokenType(tokenType token.Type) bool {
 	if !p.isPeekTokenType(tokenType) {
-		p.addPeekError(tokenType)
+		p.addError("expect next token to be %s, but got %s", tokenType, p.peekToken.Type)
 		return false
 	}
 	p.nextToken()
@@ -157,10 +168,6 @@ func (p *Parser) isCurrentTokenType(tokenType token.Type) bool {
 	return p.currentToken.Type == tokenType
 }
 
-func (p *Parser) addPeekError(tokenType token.Type) {
-	p.errors = append(p.errors, fmt.Errorf("expect next token to be %s, but got %s", tokenType, p.peekToken.Type))
-}
-
-func (p *Parser) addParseExpressionError() {
-	p.errors = append(p.errors, fmt.Errorf("no function found to parse %s", p.currentToken.Type))
+func (p *Parser) addError(format string, a ...interface{}) {
+	p.errors = append(p.errors, fmt.Errorf(format, a...))
 }

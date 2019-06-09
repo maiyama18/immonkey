@@ -66,10 +66,26 @@ func TestIdentifierExpression(t *testing.T) {
 	expStmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 	require.True(t, ok)
 
-	ident, ok := expStmt.Value.(*ast.Identifier)
+	ident, ok := expStmt.Expression.(*ast.Identifier)
 	require.True(t, ok)
 
 	require.Equal(t, "foo", ident.Name)
+}
+
+func TestIntegerLiteralExpression(t *testing.T) {
+	input := `42;`
+
+	program := parseProgram(t, input)
+
+	require.Equal(t, 1, len(program.Statements))
+
+	expStmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	require.True(t, ok)
+
+	intLiteral, ok := expStmt.Expression.(*ast.IntegerLiteral)
+	require.True(t, ok)
+
+	require.Equal(t, int64(42), intLiteral.Value)
 }
 
 func parseProgram(t *testing.T, input string) *ast.Program {
