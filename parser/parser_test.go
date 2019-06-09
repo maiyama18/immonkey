@@ -28,7 +28,7 @@ let foo = 1;
 func testLetStatement(t *testing.T, stmt ast.Statement, name string) {
 	t.Helper()
 
-	require.Equal(t, "let", stmt.Token().Literal)
+	require.Equal(t, "let", stmt.TokenLiteral())
 
 	letStmt, ok := stmt.(*ast.LetStatement)
 	require.True(t, ok)
